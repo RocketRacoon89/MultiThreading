@@ -1,10 +1,6 @@
 package main;
 
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class Test1{
 
     public static void main(String[] args) throws InterruptedException {
@@ -24,7 +20,6 @@ public class Test1{
                 } catch(InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
         });
         Thread thread3 = new Thread(new Runnable() {
