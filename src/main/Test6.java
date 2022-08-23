@@ -1,51 +1,51 @@
 package main;
 
-
 import java.util.concurrent.Semaphore;
 
-public class Test5 {
-
+public class Test6 {
     public static void main(String[] args) {
+
         Semaphore semaphore = new Semaphore(1, true);
 
-        Test5Ex test5Ex = new Test5Ex(semaphore);
-
-        Thread thread1 =new Thread(new Runnable() {
+        Thread thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     semaphore.acquire();
+                    first();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                } finally {
+                    semaphore.release();
                 }
-                test5Ex.first();
-                semaphore.release();
             }
         });
 
-        Thread thread2 =new Thread(new Runnable() {
+        Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     semaphore.acquire();
+                    second();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                } finally {
+                    semaphore.release();
                 }
-                test5Ex.second();
-                semaphore.release();
             }
         });
 
-        Thread thread3 =new Thread(new Runnable() {
+        Thread thread3 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     semaphore.acquire();
+                    third();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                } finally {
+                    semaphore.release();
                 }
-                test5Ex.third();
-                semaphore.release();
             }
         });
 
@@ -54,26 +54,16 @@ public class Test5 {
         thread3.start();
 
     }
-}
 
-class Test5Ex{
-
-    Semaphore semaphore;
-
-    public Test5Ex(Semaphore semaphore) {
-        this.semaphore=semaphore;
-    }
-
-    public void first() {
+    public static void first() {
         System.out.println("First");
     }
 
-    public void second() {
+    public static void second() {
         System.out.println("Second");
     }
 
-    public void third() {
+    public static void third() {
         System.out.println("Third");
     }
-
 }
