@@ -1,79 +1,88 @@
 package main;
 
 
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class Test5 {
 
-    public static void main(String[] args) {
-        Semaphore semaphore = new Semaphore(1, true);
+    public static void main(String[] args)  throws InterruptedException, IllegalThreadStateException  {
+        Foo5 foo = new Foo5();
 
-        Test5Ex test5Ex = new Test5Ex(semaphore);
-
-        Thread thread1 =new Thread(new Runnable() {
+        Runnable run1 = new Runnable() {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
+                    foo.first(this);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                test5Ex.first();
-                semaphore.release();
             }
-        });
+        };
 
-        Thread thread2 =new Thread(new Runnable() {
+        Runnable run2 = new Runnable() {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
+                    foo.second(this);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                test5Ex.second();
-                semaphore.release();
             }
-        });
+        };
 
-        Thread thread3 =new Thread(new Runnable() {
+        Runnable run3 = new Runnable() {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
+                    foo.third(this);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                test5Ex.third();
-                semaphore.release();
             }
-        });
+        };
 
+        Thread thread1 = new Thread(run1);
+        Thread thread2 = new Thread(run2);
+        Thread thread3 = new Thread(run3);
+
+        thread3.start();
         thread1.start();
         thread2.start();
-        thread3.start();
-
-    }
 }
+}
+class Foo5 {
 
-class Test5Ex{
+    public int threadNumber;
 
-    Semaphore semaphore;
-
-    public Test5Ex(Semaphore semaphore) {
-        this.semaphore=semaphore;
+    public Foo5() {
+        this.threadNumber = 1;
     }
 
-    public void first() {
-        System.out.println("First");
+     synchronized public void first(Runnable run) throws InterruptedException {
+        while(threadNumber!=1) {
+            wait();
+        }
+        System.out.println("First "+Thread.currentThread());
+        threadNumber++;
+        notifyAll();
     }
 
-    public void second() {
-        System.out.println("Second");
+    synchronized public void second(Runnable run) throws InterruptedException {
+        while(threadNumber!=2) {
+            wait();
+        }
+        System.out.println("Second "+Thread.currentThread());
+        threadNumber++;
+        notifyAll();
     }
 
-    public void third() {
-        System.out.println("Third");
+    synchronized public void third(Runnable run) throws InterruptedException {
+        while(threadNumber!=3) {
+            wait();
+        }
+        System.out.println("Third "+Thread.currentThread());
     }
 
 }

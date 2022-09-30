@@ -1,22 +1,21 @@
 package main;
 
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Test6 {
+
     public static void main(String[] args) {
-
-        Semaphore semaphore = new Semaphore(1, true);
-
+        Foo6 foo6 = new Foo6();
         Thread thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
-                    first();
+                    foo6.first();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                } finally {
-                    semaphore.release();
                 }
             }
         });
@@ -25,12 +24,9 @@ public class Test6 {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
-                    second();
+                    foo6.second();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                } finally {
-                    semaphore.release();
                 }
             }
         });
@@ -39,31 +35,75 @@ public class Test6 {
             @Override
             public void run() {
                 try {
-                    semaphore.acquire();
-                    third();
+                    foo6.third();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                } finally {
-                    semaphore.release();
                 }
             }
         });
 
+        thread3.start();
         thread1.start();
         thread2.start();
-        thread3.start();
+    }
+
+
+}
+
+class Foo6{
+
+    private int threadNumber;
+    private Lock lock = new ReentrantLock();
+    Condition condition = lock.newCondition();
+
+    public Foo6() {
+        this.threadNumber=1;
+    }
+
+    public void first() throws InterruptedException {
+        lock.lock();
+        try {
+            while(this.threadNumber!=1) {
+                condition.await();
+            }
+            System.out.println("First");
+            threadNumber++;
+            condition.signalAll();
+        }
+        finally {
+            lock.unlock();
+        }
 
     }
 
-    public static void first() {
-        System.out.println("First");
+    public void second() throws InterruptedException {
+        lock.lock();
+        try{
+            while (this.threadNumber!=2) {
+                condition.await();
+            }
+            System.out.println("Second");
+            threadNumber++;
+            condition.signalAll();}
+        finally {
+            lock.unlock();
+        }
+
     }
 
-    public static void second() {
-        System.out.println("Second");
+    public void third() throws InterruptedException {
+        lock.lock();
+        try{
+            while (this.threadNumber!=3) {
+                condition.await();
+            }
+            System.out.println("Third");
+            condition.signalAll();
+        }
+        finally {
+            lock.unlock();
+        }
+
     }
 
-    public static void third() {
-        System.out.println("Third");
-    }
 }
